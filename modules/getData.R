@@ -2,11 +2,14 @@
 library(tidyverse)
 library(lubridate)
 
+system_datetime <- as.POSIXct(Sys.time())
+adjusted_datetime <- as.Date(format(system_datetime, tz = "EST",usetz = TRUE))
+
 # Load data from John Hopkins GitHub & transform
 confirmed <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv") %>%
   filter(Province_State == "North Carolina") %>%
   filter(Admin2 != "Unassigned" & Admin2 != "Out of NC") %>%
-  pivot_longer(cols = 12:(as.integer(Sys.Date() - as.Date("2020-01-22")) + 11), names_to = "date", values_to = "cases") %>%
+  pivot_longer(cols = 12:(as.integer(adjusted_datetime - as.Date("2020-01-22")) + 11), names_to = "date", values_to = "cases") %>%
   mutate(date = as.Date(date, format = "%m/%d/%y")) %>%
   group_by(Admin2) %>%
   mutate(daily_cases = lag(cases, n = 1)) %>%
@@ -17,7 +20,7 @@ confirmed <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19
 deaths <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv") %>%
   filter(Province_State == "North Carolina") %>%
   filter(Admin2 != "Unassigned" & Admin2 != "Out of NC") %>%
-  pivot_longer(cols = 13:(as.integer(Sys.Date() - as.Date("2020-01-22")) + 12), names_to = "date", values_to = "deaths") %>%
+  pivot_longer(cols = 13:(as.integer(adjusted_datetime - as.Date("2020-01-22")) + 12), names_to = "date", values_to = "deaths") %>%
   mutate(date = as.Date(date, format = "%m/%d/%y")) %>%
   group_by(Admin2) %>%
   mutate(daily_deaths = lag(deaths, n = 1)) %>%
